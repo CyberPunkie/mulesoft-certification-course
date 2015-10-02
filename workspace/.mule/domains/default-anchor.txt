@@ -1,0 +1,1 @@
+Delete this file while Mule is running to undeployArtifact this artifact in a clean way.

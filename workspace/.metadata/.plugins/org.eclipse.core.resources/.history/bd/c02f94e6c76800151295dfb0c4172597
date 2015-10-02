@@ -1,0 +1,7 @@
+http.port=8081
+
+db.host=localhost
+db.port=4406
+db.user=mule
+db.password=mule
+db.database=training

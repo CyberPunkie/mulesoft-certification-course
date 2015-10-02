@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:cluster="http://www.mulesoft.org/schema/mule/ee/cluster" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="United_HTTP_Request_Configuration" host="localhost" port="8112" basePath="/essentials/united/flights" doc:name="HTTP Request Configuration"/>
+    <http:request-config name="Bank_REST_Request_Configuration" host="training.cloudhub.io" port="80" basePath="/build/banking/rest" doc:name="HTTP Request Configuration">
+        <http:raml-api-configuration location="http://localhost:8112/build/banking/raml"/>
+    </http:request-config>
+    <ws:consumer-config name="Delta_Web_Service_Consumer" wsdlLocation="http://localhost:8112/essentials/delta?wsdl" service="TicketServiceService" port="TicketServicePort" serviceAddress="http://localhost:8112/essentials/delta" doc:name="Web Service Consumer"/>
+    <db:mysql-config name="Training_MySQL_Configuration" host="localhost" port="4406" user="mule" password="mule" database="training" doc:name="MySQL Configuration"/>
+   	<sfdc:config name="Salesforce" username="roberto_calero@hotmail.com" password="Run73Goat" securityToken="ODx00AyrxqnohYCkTp6OfgC3" doc:name="Salesforce"/>
+    <mulexml:jaxb-context name="JAXB_Context" packageNames="com.mulesoft.training" doc:name="JAXB Context"/>
+    <data-mapper:config name="List_Map_To_Pojo" transformationGraphPath="list_map__to_pojo.grf" doc:name="List_Map__To_Pojo"/>
+    <data-mapper:config name="String_To_Xml_findFlight_" transformationGraphPath="string_to_xml_findflight_.grf" doc:name="String_To_Xml_findFlight_"/>
+    <payload-type-filter expectedType="java.util.ArrayList" name="Filter_Not_ArrayList" doc:name="Payload"/>
+    <configuration defaultExceptionStrategy-ref="globalChoice_Exception_Strategy" doc:name="Configuration">
+        <http:config useTransportForUris="false"/>
+    </configuration>
+    <choice-exception-strategy name="globalChoice_Exception_Strategy">
+        <catch-exception-strategy when="#[exception.causedBy(org.mule.api.expression.ExpressionRuntimeException)]" doc:name="Catch Expression Exceptions">
+            <set-payload value="The application is currently unavailable" doc:name="Set Payload"/>
+            <logger level="INFO" doc:name="Logger"/>
+        </catch-exception-strategy>
+        <catch-exception-strategy doc:name="Catch All Other Exceptions">
+            <set-payload value="Data is currently unavailable" doc:name="Set Payload"/>
+            <logger level="INFO" doc:name="Logger"/>
+        </catch-exception-strategy>
+    </choice-exception-strategy>
+   
+</mule>

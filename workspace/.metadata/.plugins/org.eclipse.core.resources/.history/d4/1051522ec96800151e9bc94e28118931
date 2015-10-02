@@ -1,0 +1,11 @@
+http.port=8081
+
+db.host=localhost
+db.port=4406
+db.user=mule
+db.password=mule
+db.database=training
+
+http.host=localhost
+http.portNum=8112
+http.pathUnited=/essentials/united/flights/{destination}

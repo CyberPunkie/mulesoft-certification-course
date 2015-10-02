@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <data-mapper:config name="CSV_To_Map" transformationGraphPath="csv_to_map.grf" doc:name="CSV_To_Map"/>
+    <flow name="getSFDCAccountsFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/sfdc" allowedMethods="GET" doc:name="HTTP"/>
+        <sfdc:query config-ref="Salesforce" query="dsql:SELECT BillingAddress,BillingCity,BillingCountry,BillingPostalCode,BillingState,BillingStreet,Name FROM Account WHERE BillingPostalCode = '94108'" doc:name="Salesforce"/>
+        <json:object-to-json-transformer doc:name="Object to JSON"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <batch:job name="accountsCSVBatch">
+        <batch:input>
+            <file:inbound-endpoint path="src/main/resources/input" moveToDirectory="src/main/resources/output" responseTimeout="10000" doc:name="File">
+                <file:filename-regex-filter pattern=".*csv" caseSensitive="true"/>
+            </file:inbound-endpoint>
+            <data-mapper:transform config-ref="CSV_To_Map" doc:name="CSV To Map"/>
+            <batch:set-record-variable variableName="size" value="#[payload.size()]" doc:name="Size"/>
+        </batch:input>
+        <batch:process-records>
+            <batch:step name="Batch_Step">
+                <set-variable variableName="fname" value="#[payload.Name]" doc:name="Variable"/>
+                <batch:set-record-variable variableName="rname" value="#[payload.Name]" doc:name="Record Variable"/>
+                <logger message="#['\n\nRecordVar: '+recordVars.rname]" level="INFO" doc:name="Logger"/>
+            </batch:step>
+            <batch:step name="Batch_Step1">
+                <logger message="#['\n\nRecordVar: '+recordVars.rname]" level="INFO" doc:name="Logger"/>
+            </batch:step>
+        </batch:process-records>
+        <batch:on-complete>
+            <logger message="#['\n\nProcessed: '+payload.processedRecords+' failed: '+payload.failedRecords]" level="INFO" doc:name="Logger"/>
+        </batch:on-complete>
+    </batch:job>
+
+    <flow name="getCSVAccountsFlow" initialState="stopped">
+        <file:inbound-endpoint path="src/main/resources/input"  moveToDirectory="src/main/resources/output" responseTimeout="10000" doc:name="File">
+            <file:filename-regex-filter pattern=".*csv" caseSensitive="true"/>
+        </file:inbound-endpoint>
+        <data-mapper:transform config-ref="CSV_To_Map" doc:name="CSV To Map"/>
+        <foreach doc:name="For Each">
+            <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+        </foreach>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>  
+    
+
+
+
+</mule>
