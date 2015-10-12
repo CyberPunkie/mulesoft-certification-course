@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
@@ -14,7 +14,8 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
-http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd">
+http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
     <flow name="getAllAirlineFlightsFlow">
         <scatter-gather doc:name="Scatter-Gather">
             <processor-chain>
@@ -33,12 +34,58 @@ http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schem
     </flow>
     <flow name="getFlightFormFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/flights" allowedMethods="GET" doc:name="HTTP"/>
-        <parse-template location="FlightFinder.html" doc:name="Parse Template"/>
+        <parse-template location="D:\AnypointStudio\workspace\apessentials\src\main\resources\FlightFinder.html" doc:name="Parse Template"/>
         <logger level="INFO" doc:name="Logger"/>
     </flow>
-    <flow name="getFlightsFromForm">
+    <flow name="transformStaticFlightsFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/static" doc:name="HTTP"/>
+        <set-payload value="&lt;ns2:listAllFlightsResponse xmlns:ns2=&quot;http://soap.training.mulesoft.com/&quot;&gt;&lt;return airlineName=&quot;United&quot;&gt;&lt;code&gt;A1B2C3&lt;/code&gt;&lt;departureDate&gt;2015/10/20&lt;/departureDate&gt;&lt;destination&gt;SFO&lt;/destination&gt;&lt;emptySeats&gt;40&lt;/emptySeats&gt;&lt;origin&gt;MUA&lt;/origin&gt;&lt;planeType&gt;Boing 737&lt;/planeType&gt;&lt;price&gt;400.0&lt;/price&gt;&lt;/return&gt;&lt;return airlineName=&quot;Delta&quot;&gt;&lt;code&gt;A1B2C4&lt;/code&gt;&lt;departureDate&gt;2015/10/21&lt;/departureDate&gt;&lt;destination&gt;LAX&lt;/destination&gt;&lt;emptySeats&gt;10&lt;/emptySeats&gt;&lt;origin&gt;MUA&lt;/origin&gt;&lt;planeType&gt;Boing 737&lt;/planeType&gt;&lt;price&gt;199.99&lt;/price&gt;&lt;/return&gt;&lt;return airlineName=&quot;Delta&quot;&gt;&lt;code&gt;AFFFC5&lt;/code&gt;&lt;departureDate&gt;2015/10/21&lt;/departureDate&gt;&lt;destination&gt;PDX&lt;/destination&gt;&lt;emptySeats&gt;30&lt;/emptySeats&gt;&lt;origin&gt;MUA&lt;/origin&gt;&lt;planeType&gt;Boing 777&lt;/planeType&gt;&lt;price&gt;283.0&lt;/price&gt;&lt;/return&gt;&lt;return airlineName=&quot;Delta&quot;&gt;&lt;code&gt;AFFFC4&lt;/code&gt;&lt;departureDate&gt;2015/10/20&lt;/departureDate&gt;&lt;destination&gt;PDX&lt;/destination&gt;&lt;emptySeats&gt;0&lt;/emptySeats&gt;&lt;origin&gt;MUA&lt;/origin&gt;&lt;planeType&gt;Boing 777&lt;/planeType&gt;&lt;price&gt;283.0&lt;/price&gt;&lt;/return&gt;&lt;return airlineName=&quot;Delta&quot;&gt;&lt;code&gt;AFFFC3&lt;/code&gt;&lt;departureDate&gt;2015/10/20&lt;/departureDate&gt;&lt;destination&gt;PDX&lt;/destination&gt;&lt;emptySeats&gt;23&lt;/emptySeats&gt;&lt;origin&gt;MUA&lt;/origin&gt;&lt;planeType&gt;Boing 777&lt;/planeType&gt;&lt;price&gt;283.0&lt;/price&gt;&lt;/return&gt;&lt;/ns2:listAllFlightsResponse&gt;" doc:name="Set Payload" mimeType="application/xml"/>
+        <dw:transform-message doc:name="Transform Message">
+            <dw:input-payload doc:sample="json_1.json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%type flight = :object {class: "com.mulesoft.training.Flight"}
+---
+payload.listAllFlightsResponse.*return map {
+	airlineName: $.airlineName,
+	departureDate: $.departureDate,
+	destination: $.destination,
+	availableSeats: $.emptySeats as :number,
+	flightCode: $.code,
+	origination: $.origin,
+	planeType: $.planeType replace /(Boing)/ with "Boeing",
+	price: $.price as :number {format: "###.##"}
+} as :flight orderBy $.price distinctBy $ filter ($.availableSeats != 0)]]></dw:set-payload>
+
+        </dw:transform-message>
+        <logger level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="getFlightsFromFormFlow">
         <http:listener config-ref="HTTP_Listener_Configuration" path="/flights" allowedMethods="POST" doc:name="HTTP"/>
-        <json:json-to-object-transformer returnClass="com.mulesoft.training.FlightRequest" doc:name="JSON to Object"/>
+        <dw:transform-message doc:name="JSON to Java">
+            <dw:input-payload doc:sample="json.json"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+payload]]></dw:set-payload>
+            <dw:set-variable variableName="json"><![CDATA[%dw 1.0
+%output application/json
+---
+data:{
+     hub: "MUA",
+     code: payload.destination,
+     airline: payload.airline
+}]]></dw:set-variable>
+            <dw:set-variable variableName="xml"><![CDATA[%dw 1.0
+%output application/xml
+---
+data:{
+     hub: "MUA",
+     flight @(airline:payload.airline): {
+	     code: payload.destination
+	}
+}]]></dw:set-variable>
+        </dw:transform-message>
         <flow-ref name="GetFlightsFlow" doc:name="GetFlightsFlow"/>
     </flow>
     <flow name="GetFlightsFlow">

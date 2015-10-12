@@ -29,4 +29,10 @@
 			<item value="org.eclipse.ui.Basic"/>
 		</list>
 	</section>
+	<section name="ImportExportAction">
+		<item value="org.mule.tooling.ui.muleExportWizard" key="ImportExportPage.STORE_SELECTED_EXPORT_WIZARD_ID"/>
+		<list key="ImportExportPage.STORE_EXPANDED_EXPORT_CATEGORIES">
+			<item value="org.mule.tooling.ui.muleExportCategory"/>
+		</list>
+	</section>
 </section>

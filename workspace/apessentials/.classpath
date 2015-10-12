@@ -4,7 +4,6 @@
 	<classpathentry kind="src" path="src/main/api"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="src" path="src/main/app"/>
-	<classpathentry exported="true" kind="con" path="MULE_RUNTIME"/>
 	<classpathentry kind="src" path="mappings"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="src" path="src/main/java"/>
@@ -13,6 +12,7 @@
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="con" path="MULE_LIB/Salesforce/org.mule.tooling.ui.contribution.sfdc.3.5.0"/>
 	<classpathentry kind="con" path="MULE_LIB/Box/org.mule.tooling.ui.contribution.box.3.5.0"/>
-	<classpathentry kind="con" path="MULE_LIB/APIkit/org.mule.tooling.apikit.3.6.0"/>
+	<classpathentry exported="true" kind="con" path="MULE_RUNTIME/org.mule.tooling.server.3.7.1.ee"/>
+	<classpathentry kind="con" path="MULE_LIB/APIkit/org.mule.tooling.apikit.3.7.0"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

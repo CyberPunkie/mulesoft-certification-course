@@ -2,7 +2,7 @@
 <launchConfiguration type="org.mule.tooling.runtime.muleServerLaunchType">
 <stringAttribute key="clear_data" value="PROMPT"/>
 <booleanAttribute key="consoleEnabled" value="true"/>
-<stringAttribute key="launch_mule_server_version" value="org.mule.tooling.server.3.6.1.ee"/>
+<stringAttribute key="launch_mule_server_version" value="org.mule.tooling.server.3.7.1.ee"/>
 <listAttribute key="mule-project-names">
 <listEntry value="apessentials"/>
 </listAttribute>
