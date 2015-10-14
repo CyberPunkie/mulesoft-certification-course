@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.7.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="United_REST_Request_Configuration" host="mu.mulesoft-training.com" port="80" basePath="/essentials/united/flights" doc:name="HTTP Request Configuration"/>
+    <http:request-config name="Bank_REST_Request_Configuration" host="mu.mulesoft-training.com" port="80" basePath="/build/banking/rest" doc:name="HTTP Request Configuration">
+        <http:raml-api-configuration location="https://anypoint.mulesoft.com/apiplatform/repository/v2/organizations/fd604b43-365c-42e8-810f-733a2b7f411f/public/apis/9565/versions/26302/files/root"/>
+    </http:request-config>
+    <ws:consumer-config name="Delta_Web_Service_Consumer" wsdlLocation="http://mu.mulesoft-training.com/essentials/delta?wsdl" service="TicketServiceService" port="TicketServicePort" serviceAddress="http://training-u.cloudhub.io/essentials/delta" doc:name="Web Service Consumer"/>
+    <flow name="getDeltaFlightsFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/delta" allowedMethods="GET" doc:name="HTTP"/>
+        <ws:consumer config-ref="Delta_Web_Service_Consumer" operation="listAllFlights" doc:name="Delta SOAP Request"/>
+        <mulexml:dom-to-xml-transformer doc:name="DOM to XML"/>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="getUnitedFlightsFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/united" allowedMethods="GET" doc:name="HTTP"/>
+        <set-variable variableName="destination" value="#[(message.inboundProperties.'http.query.params'.code == empty) ? 'SFO' : message.inboundProperties.'http.query.params'.code]" doc:name="Set Destination"/>
+        <http:request config-ref="United_REST_Request_Configuration" path="/{destination}" method="GET" doc:name="United REST Request">
+            <http:request-builder>
+                <http:uri-param paramName="destination" value="#[flowVars.destination]"/>
+            </http:request-builder>
+        </http:request>
+    </flow>
+    <flow name="getBankAccountsFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/bank/{ID}" allowedMethods="GET" doc:name="HTTP"/>
+        <http:request config-ref="Bank_REST_Request_Configuration" path="/customers/{customer_id}/accounts" method="GET" doc:name="Bank REST Request">
+            <http:request-builder>
+                <http:uri-param paramName="customer_id" value=" #[message.inboundProperties.'http.uri.params'.ID]"/>
+            </http:request-builder>
+        </http:request>
+    </flow>
+    <flow name="apessentialsFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/" doc:name="HTTP"/>
+        <set-payload value="#['Hello World'.toUpperCase()]" doc:name="Set Payload"/>
+        <set-property propertyName="qpname" value="#[message.inboundProperties.'http.query.params'.name]" doc:name="Property"/>
+        <set-variable variableName="qptype" value="#[message.inboundProperties.'http.query.params'.type]" doc:name="Variable"/>
+        <set-session-variable variableName="color" value="gray" doc:name="Session Variable"/>
+        <logger level="INFO" doc:name="Logger" message="#['Name: ' + message.outboundProperties.qpname + ' Type: ' + flowVars.qptype + ' Color: ' + sessionVars.color] "/>
+    </flow>
+</mule>

@@ -1,0 +1,76 @@
+MuleSoft.U Developer Essentials 3.7 - Snippets
+
+*******************************************************************
+
+United RESTful web service   
+• URL: http://mu.mulesoft-training.com/essentials/united/flights
+• URL for a destination: http://mu.mulesoft-training.com/essentials/united/flights/SFO (SFO,LAX,CLE,PDX,PDF)
+• Host: mu.mulesoft-training.com
+• Port: 80
+• Base path: /essentials/united/flights
+
+Banking RAML
+• URL: https://anypoint.mulesoft.com/apiplatform/repository/v2/organizations/fd604b43-365c-42e8-810f-733a2b7f411f/public/apis/9565/versions/26302/files/root
+
+Delta SOAP web service
+• URL: http://mu.mulesoft-training.com/essentials/delta
+• Operations: listAllFlights, findFlight
+• WSDL: http://mu.mulesoft-training.com/essentials/delta?wsdl
+
+MySQL database
+• Server: mudb.mulesoft-training.com
+• Port: 3306
+• User: mule
+• Password: mule
+• Database: training
+• American table: flights
+• Account table: accounts 
+• Account form URL:  http://mu.mulesoft-training.com/essentials/accounts
+• Account list URL:  http://mu.mulesoft-training.com/essentials/accounts/show
+
+JMS
+• ActiveMQ Broker URL: tcp://54.69.115.37:61616
+• Form URL: http://mu.mulesoft-training.com/jms/
+
+Example JSON from form
+{"destination":"SFO","airline":"united"}
+
+Example flights JSON
+[{"airlineName":"United","price":400,"departureDate":"2015/03/20","planeType":"Boeing 737","origination":"MUA","flightCode":"ER38sd","availableSeats":0,"destination":"SFO"},{"airlineName":"United","price":945,"departureDate":"2015/09/11","planeType":"Boeing 757","origination":"MUA","flightCode":"ER39rk","availableSeats":54,"destination":"SFO"},{"airlineName":"United","price":954,"departureDate":"2015/02/12","planeType":"Boeing 777","origination":"MUA","flightCode":"ER39rj","availableSeats":23,"destination":"SFO"}]
+
+Set Destination
+#[(flowVars.destination ==empty && message.inboundProperties.'http.query.params'.code == empty) ? 'SFO' : (flowVars.destination != empty ? flowVars.destination : message.inboundProperties.'http.query.params'.code)]
+
+FlightRequest object
+#[new com.mulesoft.training.FlightRequest(flowVars.destination,message.inboundProperties.'http.query.params'.airline)]
+
+Example flights XML
+<ns2:listAllFlightsResponse xmlns:ns2="http://soap.training.mulesoft.com/"><return airlineName="United"><code>A1B2C3</code><departureDate>2015/10/20</departureDate><destination>SFO</destination><emptySeats>40</emptySeats><origin>MUA</origin><planeType>Boing 737</planeType><price>400.0</price></return><return airlineName="Delta"><code>A1B2C4</code><departureDate>2015/10/21</departureDate><destination>LAX</destination><emptySeats>10</emptySeats><origin>MUA</origin><planeType>Boing 737</planeType><price>199.99</price></return><return airlineName="Delta"><code>AFFFC5</code><departureDate>2015/10/21</departureDate><destination>PDX</destination><emptySeats>30</emptySeats><origin>MUA</origin><planeType>Boing 777</planeType><price>283.0</price></return><return airlineName="Delta"><code>AFFFC4</code><departureDate>2015/10/20</departureDate><destination>PDX</destination><emptySeats>0</emptySeats><origin>MUA</origin><planeType>Boing 777</planeType><price>283.0</price></return><return airlineName="Delta"><code>AFFFC3</code><departureDate>2015/10/20</departureDate><destination>PDX</destination><emptySeats>23</emptySeats><origin>MUA</origin><planeType>Boing 777</planeType><price>283.0</price></return></ns2:listAllFlightsResponse>
+
+American starting DataWeave expression
+payload map {
+	airlineName: $.airlineName,
+	departureDate: $.takeOffDate,
+	destination: $.toAirport,
+	availableSeats: $.seatsAvailable,
+	flightCode: $.code1 ++ $.code2,
+	origination: $.fromAirport,
+	planeType: $.planeType,
+	price: $.price
+}
+
+Delta DataWeave expression
+payload.listAllFlightsResponse.*return map {
+	airlineName: $.airlineName,
+	departureDate: $.departureDate,
+	destination: $.destination,
+	availableSeats: $.emptySeats as :number,
+	flightCode: $.code,
+	origination: $.origin,
+	planeType: $.planeType replace /(Boing)/ with "Boeing",
+	price: $.price as :number {format: "###.##"}
+} 
+
+
+
+ 
